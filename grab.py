@@ -7,8 +7,15 @@
 # ---- #
 
 # -- Import Module
-import requests, re, os, sys
-from urlparse import urlparse
+import os
+import re
+import sys
+import requests
+import platform
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 # -- Colors
 if sys.platform in ["linux","linux2"]:
@@ -32,19 +39,23 @@ else:
    bold = ''
    u = ''
 
+# -- Clear
 if sys.platform == 'win32':
    os.system('cls')
 else:
    os.system('clear')
 
+# -- Class
 class Pausi:
    PHPSESSID = ''
    ZHE = ''
    Url = ''
+   Python_Version = ''
    def __init__(self, PHPSESSID, ZHE):
       self.PHPSESSID = PHPSESSID
       self.ZHE = ZHE
       self.ResultFileName = ''
+      self.Python_Version = platform.python_version()
    def save(self, name, isi, a='a'):
       try:
          op = open(name,a)
@@ -53,12 +64,12 @@ class Pausi:
       except:
          pass
    def input_phpsessid(self):
-      print 'Input PHPSESSID'
-      self.PHPSESSID = raw_input('PHPSESSID=')
+      print ('Input PHPSESSID')
+      self.PHPSESSID = self.input('PHPSESSID=')
       if self.PHPSESSID:self.save('.PHPSESSID',self.PHPSESSID, 'w')
    def input_zhe(self):
-      print 'Input ZHE'
-      self.ZHE = raw_input('ZHE=')
+      print ('Input ZHE')
+      self.ZHE = self.input('ZHE=')
       if self.ZHE:self.save('.ZHE',self.ZHE, 'w')
    def get_urls(self, source):
       r = re.findall('''<td>(.+?)
@@ -70,11 +81,11 @@ class Pausi:
    def Grab(self):
     #for pg in range(50):
     if not self.ResultFileName:
-      print 'Input Result File Name:'
+      print ('Input Result File Name:')
       try:
-        self.ResultFileName = raw_input('[Ex:Result.txt]=> ')
+        self.ResultFileName = self.input('[Ex:Result.txt]=> ')
         if not self.ResultFileName: self.ResultFileName = 'Results.txt'
-        print 'Results will be stored in: %s\n\n>_Start.' % (self.ResultFileName)
+        print ('Results will be stored in: %s\n\n>_Start.' % (self.ResultFileName))
       except:pass
     i = 1
     while i<=50:
@@ -90,29 +101,35 @@ class Pausi:
       #print self.Url
       #print req.text
       if '''<input type="text" name="captcha"''' in req.text:
-         print 'Captcha'
+         print ('Captcha')
          self.input_zhe()
       if '''<html><body>-<script type="text/javascript"''' in req.text:
-        print 'Maybe Error PHPSESSID && ZHE'
+        print ('Maybe Error PHPSESSID && ZHE')
         self.input_phpsessid()
         self.input_zhe()
       else:
         so = self.get_urls(req.text)
         i +=1
         if so:
-          print '\n'+yellow+self.Url
+          print ('\n'+yellow+self.Url)
           for x in so:
              url = urlparse('http://'+x).netloc
-             print blue+url
+             print (blue+url)
              self.save(self.ResultFileName, url+'\n')
         else:break
      except KeyboardInterrupt:
-        print 'Ctrl + C detect!'
+        print ('Ctrl + C detect!')
         exit()
      except ValueError as ve:
-      print ve #pass
+      print (ve) #pass
+   def input(self, q):
+      #input based on python version
+      if int(self.Python_Version[0]) == 3:
+           return input(str(q))
+      elif int(self.Python_Version[0]) == 2:
+           return raw_input(str(q))
    def menu(self):
-       print '''%s
+       print ('''%s
 d88888D  .d88b.  d8b   db d88888b        db   db
 YP  d8' .8P  Y8. 888o  88 88'            88   88
    d8'  88    88 88V8o 88 88ooooo        88ooo88
@@ -128,11 +145,11 @@ d88888P  `Y88P'  VP   V8P Y88888P        YP   YP
 %s2.%s single grab notifier
 %s3.%s grab from Special Archive
 %s4.%s grab from Archive%s
-''' % (yellow,red,green,red,green,red,green,yellow,blue,yellow,blue,yellow,blue,yellow,blue,end)
+''' % (yellow,red,green,red,green,red,green,yellow,blue,yellow,blue,yellow,blue,yellow,blue,end))
        try:
-        menu = int(raw_input('pilih-> '))
+        menu = int(self.input('pilih-> '))
         if menu == 1:
-          list = raw_input('List Nick-> ')
+          list = self.input('List Nick-> ')
           if list and os.path.isfile(list):
             pausiGans = open(list, 'r').read().strip().split('\n')
             for u in pausiGans:
@@ -142,9 +159,9 @@ d88888P  `Y88P'  VP   V8P Y88888P        YP   YP
                 self.Grab()
              except:pass
           else:
-            print 'your list is not found'
+            print ('your list is not found')
         elif menu == 2:
-          self.notifier = raw_input('Notifier=> ')
+          self.notifier = self.input('Notifier=> ')
           if self.notifier:
              self.SetUrl = 'http://zone-h.org/archive/notifier='+self.notifier+'?'
              self.Grab()
@@ -156,17 +173,21 @@ d88888P  `Y88P'  VP   V8P Y88888P        YP   YP
           self.SetUrl = 'http://zone-h.org/archive/'
           self.Grab()
         else:
-          print 'Error -> Exit.'
-        print end
+          print ('Error -> Exit.')
+        print (end)
        except ValueError:
-         print 'ValueError ~> Error ~> Exit.'
+         print ('ValueError ~> Error ~> Exit.')
        except:pass
-#PHPSESSID = '0o3uvb485p38446acuogngsdp7'
-#ZHE = 'b296b51a008278e3e71e001d04eb528e'
-if os.path.isfile('.PHPSESSID'): PHPSESSID = open('.PHPSESSID','r').read().strip()
-else:PHPSESSID = ''
-if os.path.isfile('.ZHE'): ZHE = open('.ZHE','r').read().strip()
-else:ZHE = ''
-pausi = Pausi(PHPSESSID, ZHE)
-#pausi.from_notifier()
-pausi.menu()
+
+
+# -- Main
+if __name__ == '__main__':
+     #PHPSESSID = '0o3uvb485p38446acuogngsdp7'
+     #ZHE = 'b296b51a008278e3e71e001d04eb528e'
+     if os.path.isfile('.PHPSESSID'): PHPSESSID = open('.PHPSESSID','r').read().strip()
+     else:PHPSESSID = ''
+     if os.path.isfile('.ZHE'): ZHE = open('.ZHE','r').read().strip()
+     else:ZHE = ''
+     pausi = Pausi(PHPSESSID, ZHE)
+     #pausi.from_notifier()
+     pausi.menu()
