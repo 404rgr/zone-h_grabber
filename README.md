@@ -7,5 +7,5 @@ used to get the url list from zone-h.org for other purposes
 # How To Use?
      git clone https://github.com/404rgr/zone-h_grabber
      cd zone-h_grabber
-     # use python2
      python grab.py
+- This script can be used in python 2 or 3
